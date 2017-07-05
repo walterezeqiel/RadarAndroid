@@ -21,12 +21,21 @@ public class Radar extends View{
 
     Paint paint = new Paint();//como dibujar. Canvas es que dibujar
     Paint paintEncontradas = new Paint();
+    Paint paintFondo = new Paint();
     private Canvas canvas = null;
     private int fps = 20;
     public int dist=0,ang=30,direc=0;//0 es izquierda, 1 es derecha
     ArrayList<LineasEncontradas> lineas= new ArrayList<LineasEncontradas>();
     LineasEncontradas anterior=new LineasEncontradas(0,0,0,0,0),actual=new LineasEncontradas(0,0,0,0,0);
     private int primerPaso=0;
+    private int distAjustada;
+
+    private static int pisoY = 750;
+    private static int iniX =10;
+    private static int finX=1430;
+    private static int puntoMedio=720;
+    private static int radio = 710;
+
     public class LineasEncontradas {
 
         private int startX;
@@ -99,6 +108,9 @@ public class Radar extends View{
         paintEncontradas.setAntiAlias(true);
         paintEncontradas.setStyle(Paint.Style.STROKE);
         paintEncontradas.setStrokeWidth(1.0F);
+        paintFondo.setColor(Color.BLACK);
+        paintFondo.setAntiAlias(true);
+        paintFondo.setStyle(Paint.Style.FILL);
 
     }
 
@@ -127,9 +139,9 @@ public class Radar extends View{
         this.canvas = canvas;
 
 
-          drawRadarFondo();
+        drawRadarFondo();
 
-          drawRadarMov();
+        drawRadarMov();
 
         drawEncontrados();
         //Log.d("val","------------------------------------"+Integer.toString(dist)+" d-a "+Integer.toString(ang));
@@ -137,6 +149,7 @@ public class Radar extends View{
 
     public void drawRadarFondo(){
 
+        /* cel pablo
         canvas.drawLine(0,280,280,280,paint);//dibuja el piso
         canvas.drawLine(140,280,140,0,paint);//dibujo linea al techo
 
@@ -147,11 +160,27 @@ public class Radar extends View{
         canvas.drawCircle(140,280,80,paint);
         canvas.drawCircle(140,280,60,paint);
         canvas.drawCircle(140,280,40,paint);
-        canvas.drawCircle(140,280,20,paint);
+        canvas.drawCircle(140,280,20,paint);*/
+
+        canvas.drawLine(iniX,pisoY,finX,pisoY,paint);//dibuja el piso
+        canvas.drawLine(puntoMedio,pisoY,radio,0,paint);//dibujo linea al techo
+
+        //canvas.drawCircle(720,750,710,paint);//punto medio de la pantalla, radio de la linea
+        canvas.drawCircle(puntoMedio,pisoY,700,paint);
+        canvas.drawCircle(puntoMedio,pisoY,600,paint);
+        canvas.drawCircle(puntoMedio,pisoY,500,paint);
+        canvas.drawCircle(puntoMedio,pisoY,400,paint);
+        canvas.drawCircle(puntoMedio,pisoY,300,paint);
+        canvas.drawCircle(puntoMedio,pisoY,200,paint);
+        canvas.drawCircle(puntoMedio,pisoY,100,paint);
+
+       // canvas.drawRect(0,751,1440,751,paintFondo);
+
+
     }
 
     public void drawRadarMov(){
-        int radio=140;
+        //int radio=140;
 
         /*double angle = Math.toRadians(145);
         int offsetX =  (int) (i + (float)(i * Math.cos(angle)));
@@ -162,28 +191,29 @@ public class Radar extends View{
 /*
         int offsetX =140+ (int)((float)radioMayor* Math.cos(angle));
         int offsetY =280+(int)((float)radioMayor*- Math.sin(angle));*/
-        int offsetX =  (int) (140 + (float)(radio * Math.cos(angle)));
-        int offsetY = (int) (280 - (float)(radio * Math.sin(angle)));
-        canvas.drawLine(140,280,offsetX,offsetY,paint);
-        if (this.dist < 140){
+        int offsetX =  (int) (puntoMedio + (float)(radio * Math.cos(angle)));
+        int offsetY = (int) (pisoY - (float)(radio * Math.sin(angle)));
+        canvas.drawLine(puntoMedio,pisoY,offsetX,offsetY,paint);
+        if (this.dist < 70 && this.dist>3){ // dist en cm
+            distAjustada=this.dist*10;
             //canvas.drawLine(140,280-dist,offsetX,offsetY,paintEncontradas);
             //LineasEncontradas temp = new LineasEncontradas(140+dist,280-dist,offsetX,offsetY,ang);
-            LineasEncontradas temp = new LineasEncontradas((int) (140 + (float)(dist * Math.cos(angle))),(int) (280 - (float)(dist * Math.sin(angle))),offsetX,offsetY,ang);
+            LineasEncontradas temp = new LineasEncontradas((int) (puntoMedio + (float)(distAjustada * Math.cos(angle))),(int) (pisoY - (float)(distAjustada * Math.sin(angle))),offsetX,offsetY,ang);
             lineas.add(temp);
-            Log.d("val","-----------------------Distancia:"+Integer.toString(dist));
+            Log.d("val","-----------------------Distancia:"+Integer.toString(distAjustada));
         }
         if (primerPaso==0){
-            anterior.setear(140,280,offsetX,offsetY,this.ang);
-            actual.setear(140,280,offsetX,offsetY,this.ang);
+            anterior.setear(puntoMedio,pisoY,offsetX,offsetY,this.ang);
+            actual.setear(puntoMedio,pisoY,offsetX,offsetY,this.ang);
             primerPaso=1;
         }else if (primerPaso==1){
-            actual.setear(140,280,offsetX,offsetY,this.ang);
+            actual.setear(puntoMedio,pisoY,offsetX,offsetY,this.ang);
             primerPaso=2;
         }else if (primerPaso==2) {
             anterior.setear(actual.getStartX(), actual.getStartY(), actual.getFinishX(), actual.getFinishY(), actual.getAngle());
-            actual.setear(140, 280, offsetX, offsetY, this.ang);
+            actual.setear(puntoMedio,pisoY, offsetX, offsetY, this.ang);
 
-            if (ang!=0) {
+            if (ang>10) {
                 if (direc == 0) {
                     if (actual.getAngle() > anterior.getAngle()) {
 
